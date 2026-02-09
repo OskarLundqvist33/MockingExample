@@ -31,4 +31,29 @@ class ShoppingCartTest {
         assertThat(cart.getTotalPrice()).isEqualTo(20.0);
         assertThat(cart.getItemCount()).isEqualTo(1); // Fortfarande bara 1 "rad" i korgen
     }
+
+    @Test
+    void shouldUpdateQuantityAndRemoveIfZero() {
+        ShoppingCart cart = new ShoppingCart();
+        Product banana = new Product("Banana", 5.0);
+        cart.add(banana);
+
+        // Ändra till 3 bananer
+        cart.updateQuantity(banana, 3);
+        assertThat(cart.getTotalPrice()).isEqualTo(15.0);
+
+        // Ändra till 0 bananer (ska ta bort den)
+        cart.updateQuantity(banana, 0);
+        assertThat(cart.getItemCount()).isZero();
+    }
+
+    @Test
+    void shouldRemoveProductEntirely() {
+        ShoppingCart cart = new ShoppingCart();
+        Product pear = new Product("Pear", 8.0);
+        cart.add(pear);
+
+        cart.remove(pear);
+        assertThat(cart.getItemCount()).isZero();
+    }
 }
