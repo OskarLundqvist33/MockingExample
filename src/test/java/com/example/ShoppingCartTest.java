@@ -56,4 +56,24 @@ class ShoppingCartTest {
         cart.remove(pear);
         assertThat(cart.getItemCount()).isZero();
     }
+
+    @Test
+    void shouldApplyDiscountPercentage() {
+        ShoppingCart cart = new ShoppingCart();
+        cart.add(new Product("Laptop", 1000.0));
+
+        cart.applyDiscount(20.0); // 20% rabatt
+
+        assertThat(cart.getTotalPrice()).isEqualTo(800.0);
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidDiscount() {
+        ShoppingCart cart = new ShoppingCart();
+
+        // AssertJ sätt att kolla exceptions
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> cart.applyDiscount(105.0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("mellan 0 och 100");
+    }
 }
