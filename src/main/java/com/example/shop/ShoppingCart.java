@@ -1,16 +1,23 @@
 package com.example.shop;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ShoppingCart {
-    private final List<Product> products = new ArrayList<>();
+    // Map av Produkt -> Antal
+    private final Map<Product, Integer> items = new HashMap<>();
 
     public void add(Product product) {
-        products.add(product);
+        items.put(product, items.getOrDefault(product, 0) + 1);
     }
 
     public double getTotalPrice() {
-        return products.stream().mapToDouble(Product::price).sum();
+        return items.entrySet().stream()
+                .mapToDouble(entry -> entry.getKey().price() * entry.getValue())
+                .sum();
+    }
+
+    public int getItemCount() {
+        return items.size();
     }
 }
