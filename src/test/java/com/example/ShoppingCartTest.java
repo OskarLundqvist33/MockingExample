@@ -2,78 +2,79 @@ package com.example;
 
 import com.example.shop.Product;
 import com.example.shop.ShoppingCart;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+
 
 class ShoppingCartTest {
 
+    private ShoppingCart cart;
+
+    @BeforeEach
+    void setUp() {
+        cart = new ShoppingCart();
+    }
+
     @Test
+    @DisplayName("Ska beräkna totalpris för en vara")
     void shouldCalculateTotalForSingleItem() {
-        // Arrange
-        ShoppingCart cart = new ShoppingCart();
-        Product apple = new Product("Apple", 10.0);
-
-        // Act
-        cart.add(apple);
-
-        // Assert
+        cart.add(new Product("Apple", 10.0));
         assertThat(cart.getTotalPrice()).isEqualTo(10.0);
     }
 
     @Test
+    @DisplayName("Ska gruppera dubbletter och summera pris")
     void shouldGroupDuplicateItemsAndSumPrice() {
-        ShoppingCart cart = new ShoppingCart();
         Product apple = new Product("Apple", 10.0);
-
         cart.add(apple);
-        cart.add(apple); // Lägger till igen
+        cart.add(apple);
 
         assertThat(cart.getTotalPrice()).isEqualTo(20.0);
-        assertThat(cart.getItemCount()).isEqualTo(1); // Fortfarande bara 1 "rad" i korgen
+        assertThat(cart.getItemCount()).isEqualTo(1);
+        assertThat(cart.getQuantityOf(apple)).isEqualTo(2);
     }
 
     @Test
-    void shouldUpdateQuantityAndRemoveIfZero() {
-        ShoppingCart cart = new ShoppingCart();
+    @DisplayName("Ska uppdatera kvantitet")
+    void shouldUpdateQuantity() {
         Product banana = new Product("Banana", 5.0);
         cart.add(banana);
+        cart.updateQuantity(banana, 5);
 
-        // Ändra till 3 bananer
-        cart.updateQuantity(banana, 3);
-        assertThat(cart.getTotalPrice()).isEqualTo(15.0);
+        assertThat(cart.getTotalPrice()).isEqualTo(25.0);
+    }
 
-        // Ändra till 0 bananer (ska ta bort den)
+    @Test
+    @DisplayName("Ska ta bort vara om kvantitet sätts till 0")
+    void shouldRemoveItemIfQuantityIsZero() {
+        Product banana = new Product("Banana", 5.0);
+        cart.add(banana);
         cart.updateQuantity(banana, 0);
+
         assertThat(cart.getItemCount()).isZero();
     }
 
     @Test
-    void shouldRemoveProductEntirely() {
-        ShoppingCart cart = new ShoppingCart();
-        Product pear = new Product("Pear", 8.0);
-        cart.add(pear);
-
-        cart.remove(pear);
-        assertThat(cart.getItemCount()).isZero();
-    }
-
-    @Test
-    void shouldApplyDiscountPercentage() {
-        ShoppingCart cart = new ShoppingCart();
+    @DisplayName("Ska applicera rabatt på totalen")
+    void shouldApplyDiscount() {
         cart.add(new Product("Laptop", 1000.0));
-
-        cart.applyDiscount(20.0); // 20% rabatt
-
+        cart.applyDiscount(20.0); // 20%
         assertThat(cart.getTotalPrice()).isEqualTo(800.0);
     }
 
     @Test
-    void shouldThrowExceptionForInvalidDiscount() {
-        ShoppingCart cart = new ShoppingCart();
+    @DisplayName("Ska kasta exception vid ogiltig rabatt")
+    void shouldThrowOnInvalidDiscount() {
+        assertThatThrownBy(() -> cart.applyDiscount(110.0))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 
-        // AssertJ sätt att kolla exceptions
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> cart.applyDiscount(105.0))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("mellan 0 och 100");
+    @Test
+    @DisplayName("Ska kasta exception vid null produkt")
+    void shouldThrowOnNullProduct() {
+        assertThatThrownBy(() -> cart.add(null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

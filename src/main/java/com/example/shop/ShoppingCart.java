@@ -8,7 +8,10 @@ public class ShoppingCart {
     private double discountPercentage = 0.0; // Nytt fält
 
     public void add(Product product) {
-        if (product == null) return; // Enkel null-check
+        if (product == null) {
+            throw new IllegalArgumentException("Produkten får inte vara null");
+        }
+
         items.put(product, items.getOrDefault(product, 0) + 1);
     }
 
@@ -41,5 +44,9 @@ public class ShoppingCart {
                 .sum();
 
         return subtotal * (1 - (discountPercentage / 100.0));
+    }
+
+    public int getQuantityOf(Product product) {
+        return items.getOrDefault(product, 0);
     }
 }
